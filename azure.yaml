@@ -1,0 +1,6 @@
+name: multi-tenant-scanner
+services:
+  web:
+    project: .
+    language: python
+    host: appservice
