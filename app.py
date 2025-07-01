@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 # Import Azure SDK libraries
 from azure.identity import DefaultAzureCredential
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
@@ -17,6 +18,7 @@ load_dotenv()
 credential = DefaultAzureCredential()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE', 'filesystem')
 Session(app)
