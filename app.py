@@ -35,9 +35,10 @@ REDIRECT_PATH = os.getenv('REDIRECT_PATH')
 SCOPE = os.getenv('SCOPE').split(' ') if os.getenv('SCOPE') else ["User.Read"]
 
 # This helper function builds the MSAL app. Note it no longer needs a client_credential.
-def _build_msal_app(cache=None, authority=None):
+def _build_msal_app(cache=None, authority=None, client_credential=None):
     return msal.ConfidentialClientApplication(
         CLIENT_ID, authority=authority or AUTHORITY,
+        client_credential=client_credential,
         token_cache=cache)
 
 # This helper gets the assertion token from the Managed Identity
@@ -69,9 +70,6 @@ def authorized():
 
     cache = _load_cache()
     if request.args.get('code'):
-        # First, build the MSAL app instance
-        msal_app = _build_msal_app(cache=cache)
-
         client_assertion = _get_client_assertion()
         if not client_assertion:
             return render_template("auth_error.html", result={"error": "Could not acquire client assertion from managed identity."})
@@ -81,11 +79,13 @@ def authorized():
             "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
         }
 
+        # Build the MSAL app instance WITH the assertion credential
+        msal_app = _build_msal_app(cache=cache, client_credential=credential_dict)
+
         result = msal_app.acquire_token_by_auth_code_flow(
             session.get("auth_flow", {}), # The flow from the login step
             request.args,                 # The response from Entra ID
             scopes=SCOPE
-            # Note: client_assertion is NOT passed as a kwarg here
         )
 
         if "error" in result:
@@ -96,7 +96,6 @@ def authorized():
 
     return redirect(url_for("index"))
 
-# (The rest of the code remains exactly the same as the previous version)
 
 def _get_token_from_cache(scope=None):
     cache = _load_cache()
