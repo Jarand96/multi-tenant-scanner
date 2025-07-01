@@ -78,9 +78,9 @@ def authorized():
 
         # Use the assertion to acquire the token for the user
         result = _build_msal_app(cache=cache).acquire_token_by_auth_code_flow(
-            request.args,
+            session.get("auth_flow", {}), # The flow from the login step
+            request.args,                 # The response from Entra ID
             scopes=SCOPE,
-            # Instead of a client_secret, we provide the signed assertion
             client_assertion=client_assertion
         )
 
@@ -122,12 +122,16 @@ def index():
 @app.route("/login")
 def login():
     session["state"] = str(uuid.uuid4())
-    auth_url = _build_msal_app().initiate_auth_code_flow(
+    # Create the auth code flow object
+    auth_flow = _build_msal_app().initiate_auth_code_flow(
         SCOPE,
         redirect_uri=url_for("authorized", _external=True),
         state=session["state"]
     )
-    return redirect(auth_url["auth_uri"])
+    # Save the flow in the session
+    session["auth_flow"] = auth_flow
+    # Redirect the user to the authorization URL
+    return redirect(auth_flow["auth_uri"])
 
 @app.route("/logout")
 def logout():
