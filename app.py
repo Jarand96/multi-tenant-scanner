@@ -15,7 +15,12 @@ load_dotenv()
 
 # For local development, DefaultAzureCredential uses your Azure CLI login.
 # When deployed to Azure, it automatically uses the app's associated managed identity.
-credential = DefaultAzureCredential()
+# Get the Client ID of the managed identity from environment variables
+managed_identity_client_id = os.getenv("MANAGED_IDENTITY_CLIENT_ID")
+
+# When creating the credential, explicitly pass the client_id of the
+# user-assigned managed identity. This removes ambiguity.
+credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
@@ -66,6 +71,7 @@ def authorized():
     if request.args.get('code'):
         # Get the assertion from the managed identity
         client_assertion = _get_client_assertion()
+
 
         if not client_assertion:
             return render_template("auth_error.html", result={"error": "Could not acquire client assertion from managed identity."})
