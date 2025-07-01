@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Info</title>
+</head>
+<body>
+    <h1>User Information (from ID Token Claims)</h1>
+    {% if user %}
+        <pre>{{ user | tojson(indent=4) }}</pre>
+    {% else %}
+        <p>No user information found. Please <a href="{{ url_for('login') }}">login</a>.</p>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('index') }}">Home</a>
+</body>
+</html>

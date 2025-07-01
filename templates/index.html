@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi-Tenant Web App</title>
+</head>
+<body>
+    <h1>Welcome to the Multi-Tenant App</h1>
+    {% if user %}
+        <p>Hello, {{ user.get('name', user.get('preferred_username')) }}!</p>
+        <p>Your email: {{ user.get('email', 'Not available') }}</p>
+        <p>You are logged in from tenant: {{ user.get('tid') }}</p>
+        <a href="{{ url_for('user_info') }}">View More User Info (from ID Token)</a><br>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+</body>
+</html>

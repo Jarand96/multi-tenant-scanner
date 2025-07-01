@@ -1,2 +1,6 @@
 Flask==3.1.0
 gunicorn
+msal 
+Flask-Session 
+python-dotenv
+azure-identity

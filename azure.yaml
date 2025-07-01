@@ -1,4 +1,4 @@
-name: multi-tenant-scanner
+name: resource_collector
 services:
   web:
     project: .

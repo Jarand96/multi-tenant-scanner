@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentication Error</title>
+</head>
+<body>
+    <h1>Authentication Error</h1>
+    <p>An error occurred during authentication:</p>
+    <pre>{{ result | tojson(indent=4) }}</pre>
+    <a href="{{ url_for('index') }}">Home</a>
+</body>
+</html>
