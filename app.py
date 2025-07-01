@@ -69,19 +69,23 @@ def authorized():
 
     cache = _load_cache()
     if request.args.get('code'):
-        # Get the assertion from the managed identity
+        # First, build the MSAL app instance
+        msal_app = _build_msal_app(cache=cache)
+
         client_assertion = _get_client_assertion()
-
-
         if not client_assertion:
             return render_template("auth_error.html", result={"error": "Could not acquire client assertion from managed identity."})
+       
+        msal_app.client_credential = {
+            "client_assertion": client_assertion,
+            "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+        }
 
-        # Use the assertion to acquire the token for the user
-        result = _build_msal_app(cache=cache).acquire_token_by_auth_code_flow(
+        result = msal_app.acquire_token_by_auth_code_flow(
             session.get("auth_flow", {}), # The flow from the login step
             request.args,                 # The response from Entra ID
-            scopes=SCOPE,
-            client_assertion=client_assertion
+            scopes=SCOPE
+            # Note: client_assertion is NOT passed as a kwarg here
         )
 
         if "error" in result:
