@@ -74,7 +74,7 @@ def authorized():
         if not client_assertion:
             return render_template("auth_error.html", result={"error": "Could not acquire client assertion from managed identity."})
        
-        msal_app.client_credential = {
+        client_credential = {
             "client_assertion": client_assertion,
             "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
         }
