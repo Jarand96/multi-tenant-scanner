@@ -68,14 +68,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9426303803554D57AB5FC2F16E214FD9 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3AEAF7D5C7884D9282BBDF2FCAAEC8FD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_73F8E8ED147B461CADFB8FD367BDEF1F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'longyear'
+          app-name: 'dorkla-resource-scanner'
           slot-name: 'Production'
           
