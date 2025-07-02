@@ -4,3 +4,4 @@ msal
 Flask-Session 
 python-dotenv
 azure-identity
+requests

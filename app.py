@@ -3,6 +3,7 @@ import uuid
 from flask import Flask, render_template, session, request, redirect, url_for
 from flask_session import Session
 import msal
+import requests
 from dotenv import load_dotenv
 
 # Import Azure SDK libraries
