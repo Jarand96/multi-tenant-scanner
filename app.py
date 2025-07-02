@@ -175,14 +175,14 @@ def index():
 def login():
     session["state"] = str(uuid.uuid4())
     # Create the auth code flow object
+    login_scope = ["User.Read"]
+
     auth_flow = _build_msal_app().initiate_auth_code_flow(
-        SCOPE,
+        login_scope,
         redirect_uri=url_for("authorized", _external=True),
         state=session["state"]
     )
-    # Save the flow in the session
     session["auth_flow"] = auth_flow
-    # Redirect the user to the authorization URL
     return redirect(auth_flow["auth_uri"])
 
 @app.route("/logout")
