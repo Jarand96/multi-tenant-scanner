@@ -92,9 +92,58 @@ def authorized():
             return render_template("auth_error.html", result=result)
 
         session["user"] = result.get("id_token_claims")
+        print(session["user"])
         _save_cache(cache)
 
     return redirect(url_for("index"))
+
+# --- NEW: Route to show Azure stats ---
+@app.route("/show_stats", methods=["POST"])
+def show_stats():
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    subscription_id = request.form.get("subscription_id")
+    if not subscription_id:
+        return "Subscription ID is required.", 400
+
+    # Get the customer's tenant ID from their login claims
+    customer_tenant_id = user.get("tid")
+    
+    # --- Get an App-Only Token for the Customer's Tenant ---
+    client_assertion = _get_client_assertion()
+    if not client_assertion:
+        return "Could not get client assertion.", 500
+
+    credential_dict = {
+        "client_assertion": client_assertion,
+        "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+    }
+
+    # Build an MSAL app specifically for the customer's tenant
+    customer_authority = f"https://login.microsoftonline.com/{customer_tenant_id}"
+    customer_app = _build_msal_app(authority=customer_authority, client_credential=credential_dict)
+
+    # Acquire an app-only token for the ARM API
+    token_result = customer_app.acquire_token_for_client(scopes=["https://management.azure.com/.default"])
+    
+    if "access_token" not in token_result:
+        # This usually means permissions are not granted or role is not assigned
+        return render_template("stats_error.html", error_info=token_result)
+
+    # --- Call the ARM API ---
+    arm_token = token_result["access_token"]
+    endpoint = f"https://management.azure.com/subscriptions/{subscription_id}/resourcegroups?api-version=2021-04-01"
+    headers = {'Authorization': f'Bearer {arm_token}'}
+    
+    try:
+        response = requests.get(endpoint, headers=headers)
+        response.raise_for_status() # Raise an exception for bad status codes
+        resource_groups = response.json().get("value", [])
+        return render_template("stats.html", resource_groups=resource_groups, subscription_id=subscription_id)
+    except requests.exceptions.HTTPError as err:
+        return render_template("stats_error.html", error_info=err.response.json())
 
 
 def _get_token_from_cache(scope=None):

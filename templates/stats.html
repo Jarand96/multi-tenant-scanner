@@ -54,3 +54,74 @@
     </div>
 </body>
 </html>
+
+<!-- templates/stats.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Azure Resource Stats</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .container { max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Resource Groups in Subscription: {{ subscription_id }}</h1>
+        {% if resource_groups %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rg in resource_groups %}
+                        <tr>
+                            <td>{{ rg.name }}</td>
+                            <td>{{ rg.location }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No resource groups found, or the application does not have Reader access to this subscription.</p>
+        {% endif %}
+        <br>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
+</body>
+</html>
+
+<!-- templates/stats_error.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error Getting Stats</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .container { max-width: 800px; margin: auto; }
+        .error-box { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 1em; border-radius: 8px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Could Not Retrieve Azure Resources</h1>
+        <div class="error-box">
+            <p>
+                An error occurred. This usually means that either an administrator has not yet granted the required permissions,
+                or the "Reader" role has not been assigned to the application on the target subscription.
+            </p>
+            <p><strong>Error Details:</strong></p>
+            <pre>{{ error_info | tojson(indent=4) }}</pre>
+        </div>
+        <br>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
+</body>
+</html>
